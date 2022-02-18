@@ -74,6 +74,11 @@ then
         echo -e "\nFind libgtk-3, installing: libgtk-3-dev libglew-dev libudev-dev libdbus-1-dev cmake git\n"
         apt install libgtk-3-dev libglew-dev libudev-dev libdbus-1-dev cmake git
     fi
+    if [[ -n "$BUILD_DEBUG" ]]
+    then
+        echo -e "\nInstalling: libssl-dev libcurl4-openssl-dev\n"
+        apt install libssl-dev libcurl4-openssl-dev
+    fi
     echo -e "done\n"
     exit 0
 fi
@@ -122,6 +127,13 @@ then
     fi
     if [[ -n "$BUILD_DEBUG" ]]
     then
+        mkdir deps/build/release
+        pushd deps/build/release
+            cmake ../.. -DDESTDIR="../destdir" $BUILD_ARGS
+            make -j$NCORES
+        popd
+        echo "ls (release) $PWD/deps/build/destdir/usr/local/lib"
+        ls $PWD/deps/build/destdir/usr/local/lib
         BUILD_ARGS="${BUILD_ARGS} -DCMAKE_BUILD_TYPE=Debug"
     fi
     
@@ -134,6 +146,8 @@ then
         echo "[4/9] Building dependencies..."
         make -j$NCORES
         echo "done"
+        echo "ls (release+debug) $PWD/destdir/usr/local/lib"
+        ls $PWD/destdir/usr/local/lib
         
         # rename wxscintilla
         echo "[5/9] Renaming wxscintilla library..."
